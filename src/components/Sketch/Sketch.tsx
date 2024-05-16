@@ -106,26 +106,39 @@ export default function Sketch() {
 
   const startDraw = () => {
     if (canvas) {
-      if (mode !== "pencil") {
-        setMode("pencil");
-        canvas.isDrawingMode = true;
-        const brush = new fabric.ExtendedPencilBrush(canvas);
-        brush.color = "black";
-        brush.width = 3;
-        brush.globalCompositeOperation = "source-over";
-        canvas.freeDrawingBrush = brush;
-        canvas.renderAll();
-      } else {
-        setMode("select");
-        canvas.isDrawingMode = false;
-        canvas.selection = true;
-        canvas.renderAll();
-      }
+      setMode("pencil");
+      canvas.isDrawingMode = true;
+      const brush = new fabric.ExtendedPencilBrush(canvas);
+      brush.color = "black";
+      brush.width = 3;
+      brush.globalCompositeOperation = "source-over";
+      canvas.freeDrawingBrush = brush;
+      canvas.renderAll();
+    }
+  };
+
+  const startSelect = () => {
+    if (canvas) {
+      setMode("select");
+      canvas.isDrawingMode = false;
+      canvas.selection = true;
+      canvas.renderAll();
     }
   };
 
   const clearCanvas = () => {
-    canvas?.clear();
+    if (canvas) {
+      canvas.clear();
+    }
+  };
+
+  const deleteSelectedObject = () => {
+    if (canvas) {
+      const activeObject = canvas.getActiveObject();
+      if (activeObject) {
+        canvas.remove(activeObject);
+      }
+    }
   };
 
   const handleMouseDown = (o: fabric.IEvent) => {
@@ -190,7 +203,9 @@ export default function Sketch() {
       <button onClick={addRect}>Add Rectangle</button>
       <button onClick={addTriangle}>Add Triangle</button>
       <button onClick={startDraw}>Start Drawing</button>
+      <button onClick={startSelect}>Select</button>
       <button onClick={clearCanvas}>Clear Canvas</button>
+      <button onClick={deleteSelectedObject}>Delete Selected Object</button>
       <canvas
         ref={canvasRef}
         width={800}
