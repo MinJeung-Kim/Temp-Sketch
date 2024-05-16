@@ -1,4 +1,3 @@
-// src/FabricCanvas.tsx
 import { useRef, useEffect, useState } from "react";
 import { fabric } from "fabric";
 
@@ -37,75 +36,72 @@ export default function Sketch() {
     }
   }, []);
 
-  const addHex = () => {
+  const addShape = (shape: fabric.Object) => {
     if (canvas) {
-      const id = Date.now();
-      const points = regularPolygonPoints(6, 50);
-      const myPoly = new fabric.Polygon(points, {
-        id,
-        left: canvas.width! / 2,
-        top: canvas.height! / 2,
-        width: 100,
-        height: 100,
-        originX: "center",
-        originY: "center",
-        fill: "rgba(0,0,0,0)",
-        stroke: "black",
-        strokeWidth: 3,
-      } as fabric.Polygon);
-      canvas.add(myPoly);
+      canvas.add(shape);
     }
   };
 
-  const regularPolygonPoints = (sideCount: number, radius: number) => {
+  const createPolygon = (sideCount: number, radius: number) => {
     const sweep = (Math.PI * 2) / sideCount;
-    const cx = radius;
-    const cy = radius;
-    const points: { x: number; y: number }[] = [];
+    const points = [];
     for (let i = 0; i < sideCount; i++) {
-      const x = cx + radius * Math.cos(i * sweep);
-      const y = cy + radius * Math.sin(i * sweep);
-      points.push({ x, y });
+      points.push({
+        x: radius + radius * Math.cos(i * sweep),
+        y: radius + radius * Math.sin(i * sweep),
+      });
     }
     return points;
   };
 
+  const addHex = () => {
+    const id = Date.now();
+    const points = createPolygon(6, 50);
+    const hex = new fabric.Polygon(points, {
+      id,
+      left: canvas!.width! / 2,
+      top: canvas!.height! / 2,
+      fill: "rgba(0,0,0,0)",
+      stroke: "black",
+      strokeWidth: 3,
+      originX: "center",
+      originY: "center",
+    } as fabric.Polygon);
+    addShape(hex);
+  };
+
   const addRect = () => {
-    if (canvas) {
-      const id = Date.now();
-      const rect = new fabric.Rect({
-        id,
-        left: canvas.width! / 2,
-        top: canvas.height! / 2,
-        fill: "rgba(0,0,0,0)",
-        stroke: "black",
-        width: 50,
-        height: 50,
-        originX: "center",
-        originY: "center",
-        strokeWidth: 3,
-      } as fabric.Rect);
-      canvas.add(rect);
-    }
+    const id = Date.now();
+    const rect = new fabric.Rect({
+      id,
+      left: canvas!.width! / 2,
+      top: canvas!.height! / 2,
+      fill: "rgba(0,0,0,0)",
+      stroke: "black",
+      width: 50,
+      height: 50,
+      originX: "center",
+      originY: "center",
+      strokeWidth: 3,
+    } as fabric.Rect);
+    addShape(rect);
   };
 
   const addTriangle = () => {
-    if (canvas) {
-      const id = Date.now();
-      const triangle = new fabric.Triangle({
-        id,
-        left: canvas.width! / 2,
-        top: canvas.height! / 2,
-        fill: "rgba(0,0,0,0)",
-        stroke: "black",
-        width: 44,
-        height: 44,
-        originX: "center",
-        originY: "center",
-        strokeWidth: 3,
-      } as fabric.Triangle);
-      canvas.add(triangle);
-    }
+    const id = Date.now();
+    const triangle = new fabric.Triangle({
+      id,
+      left: canvas!.width! / 2,
+      top: canvas!.height! / 2,
+      fill: "rgba(0,0,0,0)",
+      stroke: "black",
+      width: 44,
+      height: 44,
+      originX: "center",
+      originY: "center",
+      strokeWidth: 3,
+    } as fabric.Triangle);
+    addShape(triangle);
   };
 
   const startDraw = () => {
@@ -129,9 +125,7 @@ export default function Sketch() {
   };
 
   const clearCanvas = () => {
-    if (canvas) {
-      canvas.clear();
-    }
+    canvas?.clear();
   };
 
   const handleMouseDown = (o: fabric.IEvent) => {
