@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
-import Pen from "../Pen";
-import Undo from "../Undo";
-import Redo from "../Redo";
-import Text from "../Text";
-import Color from "../Color";
-import Reset from "../Reset";
-import Delete from "../Delete";
-import Select from "../Select";
-import AddShape from "../AddShape";
-import AddImage from "../AddImage";
-import AddBackground from "../AddBackground";
+import Pen from "./Options/Pen";
+import Undo from "./Options/Undo";
+import Redo from "./Options/Redo";
+import Text from "./Options/Text";
+import Color from "./Options/Color";
+import Reset from "./Options/Reset";
+import Delete from "./Options/Delete";
+import Select from "./Options/Select";
+import AddShape from "./Options/AddShape";
+import AddImage from "./Options/AddImage";
+import AddBackground from "./Options/AddBackground";
 import { useCanvas } from "@src/context/CanvasContext";
 import { S } from "./styles";
 
