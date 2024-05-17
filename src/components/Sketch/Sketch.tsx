@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
 import { fabric } from "fabric";
-import { ExtendedPencilBrush } from "../CustomPencilBrush";
 
 const FabricCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -10,7 +9,13 @@ const FabricCanvas: React.FC = () => {
   const [line, setLine] = useState<fabric.Line | null>(null);
   const [undoHistory, setUndoHistory] = useState<string[]>([]);
   const [redoHistory, setRedoHistory] = useState<string[]>([]);
-  const [textValue, setTextValue] = useState<string>("");
+  const [inputVisible, setInputVisible] = useState<boolean>(false);
+  const [inputStyle, setInputStyle] = useState<React.CSSProperties>({});
+  const [inputPosition, setInputPosition] = useState<{
+    left: number;
+    top: number;
+  }>({ left: 0, top: 0 });
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -28,7 +33,7 @@ const FabricCanvas: React.FC = () => {
       });
       setCanvas(canvasInstance);
 
-      // 초기 상태 저장
+      // Save the initial empty state
       saveState(canvasInstance);
 
       canvasInstance.perPixelTargetFind = true;
@@ -57,7 +62,7 @@ const FabricCanvas: React.FC = () => {
     const json = JSON.stringify(canvasInstance.toJSON());
     const newUndoHistory = [...undoHistory, json];
     setUndoHistory(newUndoHistory);
-    setRedoHistory([]); // 새로운 상태가 저장될 때마다 redo 히스토리 초기화
+    setRedoHistory([]); // Clear redo history when a new state is saved
   };
 
   const undo = () => {
@@ -103,10 +108,8 @@ const FabricCanvas: React.FC = () => {
   };
 
   const addHex = () => {
-    const id = Date.now();
     const points = createPolygon(6, 50);
     const hex = new fabric.Polygon(points, {
-      id,
       left: canvas!.width! / 2,
       top: canvas!.height! / 2,
       fill: "rgba(0,0,0,0)",
@@ -119,9 +122,7 @@ const FabricCanvas: React.FC = () => {
   };
 
   const addRect = () => {
-    const id = Date.now();
     const rect = new fabric.Rect({
-      id,
       left: canvas!.width! / 2,
       top: canvas!.height! / 2,
       fill: "rgba(0,0,0,0)",
@@ -136,9 +137,7 @@ const FabricCanvas: React.FC = () => {
   };
 
   const addTriangle = () => {
-    const id = Date.now();
     const triangle = new fabric.Triangle({
-      id,
       left: canvas!.width! / 2,
       top: canvas!.height! / 2,
       fill: "rgba(0,0,0,0)",
@@ -155,10 +154,9 @@ const FabricCanvas: React.FC = () => {
   const startDraw = () => {
     if (canvas) {
       setMode("pencil");
-      const brush = new ExtendedPencilBrush(canvas);
+      const brush = new fabric.PencilBrush(canvas);
       brush.color = "black";
       brush.width = 3;
-      brush.globalCompositeOperation = "source-over";
       canvas.freeDrawingBrush = brush;
       canvas.isDrawingMode = true;
       canvas.renderAll();
@@ -191,20 +189,48 @@ const FabricCanvas: React.FC = () => {
     }
   };
 
-  const addText = () => {
-    if (canvas) {
-      const text = new fabric.IText(textValue, {
-        left: canvas!.width! / 2,
-        top: canvas!.height! / 2,
-        fontFamily: "Arial",
-        fontSize: 20,
-        fill: "#000",
-        originX: "center",
-        originY: "center",
+  const handleCanvasClick = (event: fabric.IEvent) => {
+    if (mode === "text" && canvas) {
+      const pointer = canvas.getPointer(event.e);
+      setInputStyle({
+        left: pointer.x,
+        top: pointer.y,
+        position: "absolute",
+        border: "1px solid #000",
+        background: "transparent",
+        color: "#000",
+        fontSize: "20px",
+        outline: "none",
+        zIndex: 1,
       });
-      canvas.add(text);
-      saveState(canvas);
-      setTextValue("");
+      setInputPosition({ left: pointer.x, top: pointer.y });
+      setInputVisible(true);
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 0);
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (canvas && inputRef.current) {
+      const value = inputRef.current.value;
+      if (value) {
+        const text = new fabric.IText(value, {
+          left: inputPosition.left,
+          top: inputPosition.top,
+          fontFamily: "Arial",
+          fontSize: 20,
+          fill: "#000",
+          originX: "left",
+          originY: "top",
+        });
+        canvas.add(text);
+        saveState(canvas);
+      }
+      setInputVisible(false);
+      inputRef.current.value = "";
     }
   };
 
@@ -252,6 +278,7 @@ const FabricCanvas: React.FC = () => {
 
   useEffect(() => {
     if (canvas) {
+      canvas.on("mouse:down", handleCanvasClick);
       canvas.on("mouse:down", handleMouseDown);
       canvas.on("mouse:move", handleMouseMove);
       canvas.on("mouse:up", handleMouseUp);
@@ -259,28 +286,17 @@ const FabricCanvas: React.FC = () => {
       canvas.on("object:modified", () => saveState(canvas));
       canvas.on("object:removed", () => saveState(canvas));
     }
-
-    return () => {
-      if (canvas) {
-        canvas.off("mouse:down", handleMouseDown);
-        canvas.off("mouse:move", handleMouseMove);
-        canvas.off("mouse:up", handleMouseUp);
-        canvas.off("object:added", () => saveState(canvas));
-        canvas.off("object:modified", () => saveState(canvas));
-        canvas.off("object:removed", () => saveState(canvas));
-      }
-    };
   }, [canvas, mode, line]);
 
   return (
-    <div>
+    <div style={{ position: "relative" }}>
       <input
         type="text"
-        value={textValue}
-        onChange={(e) => setTextValue(e.target.value)}
-        placeholder="Enter text"
+        ref={inputRef}
+        style={{ ...inputStyle, display: inputVisible ? "block" : "none" }}
+        onBlur={handleInputBlur}
       />
-      <button onClick={addText}>Add Text</button>
+      <button onClick={() => setMode("text")}>Add Text</button>
       <button onClick={addHex}>Add Hexagon</button>
       <button onClick={addRect}>Add Rectangle</button>
       <button onClick={addTriangle}>Add Triangle</button>
