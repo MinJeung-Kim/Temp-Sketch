@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import { fabric } from "fabric";
+import AddImage from "../AddImage";
+import { useCanvas } from "@src/context/CanvasContext";
 
 const FabricCanvas: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const { saveState, canvas } = useCanvas();
   const [mode, setMode] = useState<string>("");
   const [isDown, setIsDown] = useState<boolean>(false);
   const [line, setLine] = useState<fabric.Line | null>(null);
@@ -17,55 +18,6 @@ const FabricCanvas: React.FC = () => {
   }>({ left: 0, top: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      const canvasElement = canvasRef.current;
-      const context = canvasElement.getContext("2d", {
-        willReadFrequently: true,
-      });
-      if (!context) {
-        console.error("2D context not available");
-        return;
-      }
-
-      const canvasInstance = new fabric.Canvas(canvasElement, {
-        backgroundColor: "white",
-      });
-      setCanvas(canvasInstance);
-
-      // Save the initial empty state
-      saveState(canvasInstance);
-
-      canvasInstance.perPixelTargetFind = true;
-      canvasInstance.targetFindTolerance = 4;
-
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Delete") {
-          const activeObject = canvasInstance.getActiveObject();
-          if (activeObject) {
-            canvasInstance.remove(activeObject);
-            saveState(canvasInstance);
-          }
-        }
-      };
-
-      window.addEventListener("keydown", handleKeyDown);
-
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-        canvasInstance.dispose();
-      };
-    }
-  }, []);
-
-  const saveState = (canvasInstance: fabric.Canvas) => {
-    const json = JSON.stringify(canvasInstance.toJSON());
-    const newUndoHistory = [...undoHistory, json];
-    setUndoHistory(newUndoHistory);
-    setRedoHistory([]); // Clear redo history when a new state is saved
-  };
 
   const undo = () => {
     if (canvas && undoHistory.length > 1) {
@@ -300,33 +252,6 @@ const FabricCanvas: React.FC = () => {
     }
   };
 
-  const addImageToCanvas = (file: File) => {
-    if (canvas) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        fabric.Image.fromURL(e.target?.result as string, (img) => {
-          img.set({
-            left: canvas.width! / 2,
-            top: canvas.height! / 2,
-            originX: "center",
-            originY: "center",
-          });
-          canvas.add(img);
-          saveState(canvas);
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleImageFileChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files && event.target.files.length > 0) {
-      addImageToCanvas(event.target.files[0]);
-    }
-  };
-
   useEffect(() => {
     if (canvas) {
       canvas.on("mouse:down", handleCanvasClick);
@@ -368,20 +293,7 @@ const FabricCanvas: React.FC = () => {
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-      <button onClick={() => imageInputRef.current?.click()}>Set Image</button>
-      <input
-        type="file"
-        accept="image/*"
-        ref={imageInputRef}
-        style={{ display: "none" }}
-        onChange={handleImageFileChange}
-      />
-      <canvas
-        ref={canvasRef}
-        width={800}
-        height={600}
-        style={{ border: "1px solid #ccc" }}
-      />
+      <AddImage />
     </div>
   );
 };
