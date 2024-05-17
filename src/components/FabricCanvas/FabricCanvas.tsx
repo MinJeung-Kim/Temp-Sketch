@@ -4,6 +4,7 @@ import Pen from "../Pen";
 import Undo from "../Undo";
 import Redo from "../Redo";
 import Text from "../Text";
+import Color from "../Color";
 import Reset from "../Reset";
 import Delete from "../Delete";
 import Select from "../Select";
@@ -11,9 +12,11 @@ import AddShape from "../AddShape";
 import AddImage from "../AddImage";
 import AddBackground from "../AddBackground";
 import { useCanvas } from "@src/context/CanvasContext";
+import { S } from "./styles";
 
-const FabricCanvas: React.FC = () => {
+export default function FabricCanvas() {
   const { saveState, canvas, mode } = useCanvas();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isDown, setIsDown] = useState<boolean>(false);
   const [line, setLine] = useState<fabric.Line | null>(null);
   const [inputVisible, setInputVisible] = useState<boolean>(false);
@@ -22,7 +25,6 @@ const FabricCanvas: React.FC = () => {
     left: number;
     top: number;
   }>({ left: 0, top: 0 });
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleCanvasClick = (event: fabric.IEvent) => {
     if (mode === "text" && canvas) {
@@ -103,7 +105,7 @@ const FabricCanvas: React.FC = () => {
   }, [canvas, mode, line]);
 
   return (
-    <div style={{ position: "relative" }}>
+    <S.Canvas>
       <AddShape />
       <Text
         inputRef={inputRef}
@@ -120,8 +122,7 @@ const FabricCanvas: React.FC = () => {
       <Redo />
       <AddBackground />
       <AddImage />
-    </div>
+      <Color />
+    </S.Canvas>
   );
-};
-
-export default FabricCanvas;
+}

@@ -17,6 +17,8 @@ type State = {
   setRedoHistory: React.Dispatch<React.SetStateAction<string[]>>;
   mode: string;
   setMode: React.Dispatch<React.SetStateAction<string>>;
+  selectedColor: string;
+  setSelectedColor: React.Dispatch<React.SetStateAction<string>>;
   saveState: (canvasInstance: fabric.Canvas) => void;
 };
 
@@ -28,6 +30,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [undoHistory, setUndoHistory] = useState<string[]>([]);
   const [redoHistory, setRedoHistory] = useState<string[]>([]);
   const [mode, setMode] = useState<string>("");
+  const [selectedColor, setSelectedColor] = useState<string>("black");
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -89,6 +92,8 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         saveState,
         mode,
         setMode,
+        selectedColor,
+        setSelectedColor,
       }}
     >
       {children}

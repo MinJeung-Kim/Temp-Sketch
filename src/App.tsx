@@ -1,11 +1,11 @@
 import "./App.css";
-import Sketch from "./components/Sketch/Sketch";
+import FabricCanvas from "./components/FabricCanvas/FabricCanvas";
 import { CanvasProvider } from "./context/CanvasContext";
 
 function App() {
   return (
     <CanvasProvider>
-      <Sketch />
+      <FabricCanvas />
     </CanvasProvider>
   );
 }
