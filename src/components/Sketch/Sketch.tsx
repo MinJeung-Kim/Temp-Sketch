@@ -16,6 +16,7 @@ const FabricCanvas: React.FC = () => {
     top: number;
   }>({ left: 0, top: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -276,6 +277,28 @@ const FabricCanvas: React.FC = () => {
     }
   };
 
+  const setBackgroundImage = (file: File) => {
+    if (canvas) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        fabric.Image.fromURL(e.target?.result as string, (img) => {
+          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+            scaleX: canvas.width! / img.width!,
+            scaleY: canvas.height! / img.height!,
+          });
+          saveState(canvas);
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setBackgroundImage(event.target.files[0]);
+    }
+  };
+
   useEffect(() => {
     if (canvas) {
       canvas.on("mouse:down", handleCanvasClick);
@@ -306,6 +329,17 @@ const FabricCanvas: React.FC = () => {
       <button onClick={deleteSelectedObject}>Delete Selected Object</button>
       <button onClick={undo}>Undo</button>
       <button onClick={redo}>Redo</button>
+      <button onClick={clearCanvas}>Clear Canvas</button>
+      <button onClick={() => fileInputRef.current?.click()}>
+        Set Background Image
+      </button>
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
       <canvas
         ref={canvasRef}
         width={800}
