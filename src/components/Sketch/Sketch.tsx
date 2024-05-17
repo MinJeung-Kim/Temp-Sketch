@@ -1,19 +1,34 @@
-import { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { fabric } from "fabric";
+import { ExtendedPencilBrush } from "../CustomPencilBrush";
 
-export default function Sketch() {
+const FabricCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [mode, setMode] = useState<string>("");
   const [isDown, setIsDown] = useState<boolean>(false);
   const [line, setLine] = useState<fabric.Line | null>(null);
+  const [history, setHistory] = useState<string[]>([]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState<number>(-1);
 
   useEffect(() => {
     if (canvasRef.current) {
-      const canvasInstance = new fabric.Canvas(canvasRef.current, {
+      const canvasElement = canvasRef.current;
+      const context = canvasElement.getContext("2d", {
+        willReadFrequently: true,
+      });
+      if (!context) {
+        console.error("2D context not available");
+        return;
+      }
+
+      const canvasInstance = new fabric.Canvas(canvasElement, {
         backgroundColor: "white",
       });
       setCanvas(canvasInstance);
+
+      // Save the initial empty state
+      saveState(canvasInstance);
 
       canvasInstance.perPixelTargetFind = true;
       canvasInstance.targetFindTolerance = 4;
@@ -23,6 +38,7 @@ export default function Sketch() {
           const activeObject = canvasInstance.getActiveObject();
           if (activeObject) {
             canvasInstance.remove(activeObject);
+            saveState(canvasInstance);
           }
         }
       };
@@ -36,9 +52,29 @@ export default function Sketch() {
     }
   }, []);
 
+  const saveState = (canvasInstance: fabric.Canvas) => {
+    const json = JSON.stringify(canvasInstance.toJSON());
+    const newHistory = history.slice(0, currentHistoryIndex + 1);
+    newHistory.push(json);
+    setHistory(newHistory);
+    setCurrentHistoryIndex(newHistory.length - 1);
+  };
+
+  const undo = () => {
+    if (canvas && currentHistoryIndex > 0) {
+      const newHistoryIndex = currentHistoryIndex - 1;
+      const previousState = history[newHistoryIndex];
+      canvas.loadFromJSON(previousState, () => {
+        canvas.renderAll();
+        setCurrentHistoryIndex(newHistoryIndex);
+      });
+    }
+  };
+
   const addShape = (shape: fabric.Object) => {
     if (canvas) {
       canvas.add(shape);
+      saveState(canvas);
     }
   };
 
@@ -107,12 +143,12 @@ export default function Sketch() {
   const startDraw = () => {
     if (canvas) {
       setMode("pencil");
-      canvas.isDrawingMode = true;
-      const brush = new fabric.ExtendedPencilBrush(canvas);
+      const brush = new ExtendedPencilBrush(canvas);
       brush.color = "black";
       brush.width = 3;
       brush.globalCompositeOperation = "source-over";
       canvas.freeDrawingBrush = brush;
+      canvas.isDrawingMode = true;
       canvas.renderAll();
     }
   };
@@ -129,6 +165,7 @@ export default function Sketch() {
   const clearCanvas = () => {
     if (canvas) {
       canvas.clear();
+      saveState(canvas);
     }
   };
 
@@ -137,6 +174,7 @@ export default function Sketch() {
       const activeObject = canvas.getActiveObject();
       if (activeObject) {
         canvas.remove(activeObject);
+        saveState(canvas);
       }
     }
   };
@@ -157,6 +195,7 @@ export default function Sketch() {
         });
         canvas.add(newLine);
         setLine(newLine);
+        saveState(canvas); // Save state after starting a new line
       }
     }
   };
@@ -177,6 +216,7 @@ export default function Sketch() {
       setIsDown(false);
       if (line) {
         line.setCoords();
+        saveState(canvas); // Save state after completing the line
       }
     }
   };
@@ -186,6 +226,9 @@ export default function Sketch() {
       canvas.on("mouse:down", handleMouseDown);
       canvas.on("mouse:move", handleMouseMove);
       canvas.on("mouse:up", handleMouseUp);
+      canvas.on("object:added", () => saveState(canvas));
+      canvas.on("object:modified", () => saveState(canvas));
+      canvas.on("object:removed", () => saveState(canvas));
     }
 
     return () => {
@@ -193,6 +236,9 @@ export default function Sketch() {
         canvas.off("mouse:down", handleMouseDown);
         canvas.off("mouse:move", handleMouseMove);
         canvas.off("mouse:up", handleMouseUp);
+        canvas.off("object:added", () => saveState(canvas));
+        canvas.off("object:modified", () => saveState(canvas));
+        canvas.off("object:removed", () => saveState(canvas));
       }
     };
   }, [canvas, mode, line]);
@@ -206,6 +252,7 @@ export default function Sketch() {
       <button onClick={startSelect}>Select</button>
       <button onClick={clearCanvas}>Clear Canvas</button>
       <button onClick={deleteSelectedObject}>Delete Selected Object</button>
+      <button onClick={undo}>Undo</button>
       <canvas
         ref={canvasRef}
         width={800}
@@ -214,4 +261,6 @@ export default function Sketch() {
       />
     </div>
   );
-}
+};
+
+export default FabricCanvas;
