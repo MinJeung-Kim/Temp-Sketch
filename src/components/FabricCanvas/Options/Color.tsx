@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useCanvas } from "@src/context/CanvasContext";
+import ColorIcon from "@src/components/ui/icons/ColorIcon";
+import { S } from "./styles";
 
 export default function Color() {
   const { setSelectedColor } = useCanvas();
@@ -20,20 +22,11 @@ export default function Color() {
 
   return (
     <>
-      <button onClick={() => setShowColorMenu(!showColorMenu)}>
-        Select Color
-      </button>
+      <S.Button onClick={() => setShowColorMenu(!showColorMenu)}>
+        <ColorIcon /> 색상
+      </S.Button>
       {showColorMenu && (
-        <div
-          style={{
-            position: "absolute",
-            top: "40px",
-            left: "120px",
-            background: "white",
-            border: "1px solid #ccc",
-            padding: "10px",
-          }}
-        >
+        <S.Color>
           {colors.map((color, index) => (
             <button
               key={index}
@@ -44,7 +37,7 @@ export default function Color() {
               style={{ backgroundColor: color, width: "20px", height: "20px" }}
             ></button>
           ))}
-        </div>
+        </S.Color>
       )}
     </>
   );

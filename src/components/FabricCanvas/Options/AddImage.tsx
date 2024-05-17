@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { fabric } from "fabric";
 import { useCanvas } from "@src/context/CanvasContext";
+import ImageIcon from "@src/components/ui/icons/ImageIcon";
+import { S } from "./styles";
 
 export default function AddImage() {
   const { undoHistory, setUndoHistory, setRedoHistory, canvas } = useCanvas();
@@ -42,7 +44,10 @@ export default function AddImage() {
 
   return (
     <>
-      <button onClick={() => imageInputRef.current?.click()}>Set Image</button>
+      <S.Button onClick={() => imageInputRef.current?.click()}>
+        <ImageIcon />
+        이미지 추가
+      </S.Button>
       <input
         type="file"
         accept="image/*"

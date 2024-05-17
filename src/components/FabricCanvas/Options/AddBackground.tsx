@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { fabric } from "fabric";
 import { useCanvas } from "@src/context/CanvasContext";
+import { S } from "./styles";
+import BackgroundIcon from "@src/components/ui/icons/BackgroundIcon";
 
 export default function AddBackground() {
   const { saveState, canvas } = useCanvas();
@@ -30,9 +32,10 @@ export default function AddBackground() {
 
   return (
     <>
-      <button onClick={() => fileInputRef.current?.click()}>
-        Set Background Image
-      </button>
+      <S.Button onClick={() => fileInputRef.current?.click()}>
+        <BackgroundIcon />
+        배경 추가
+      </S.Button>
       <input
         type="file"
         accept="image/*"

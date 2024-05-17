@@ -1,6 +1,8 @@
+import EraserIcon from "@src/components/ui/icons/EraserIcon";
 import { useCanvas } from "@src/context/CanvasContext";
+import { S } from "./styles";
 
-export default function Delete() {
+export default function Eraser() {
   const { saveState, canvas } = useCanvas();
 
   const deleteSelectedObject = () => {
@@ -13,5 +15,10 @@ export default function Delete() {
     }
   };
 
-  return <button onClick={deleteSelectedObject}>Delete Selected Object</button>;
+  return (
+    <S.Button onClick={deleteSelectedObject}>
+      <EraserIcon />
+      지우기
+    </S.Button>
+  );
 }

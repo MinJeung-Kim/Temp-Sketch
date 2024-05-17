@@ -1,4 +1,6 @@
+import RedoIcon from "@src/components/ui/icons/RedoIcon";
 import { useCanvas } from "@src/context/CanvasContext";
+import { S } from "./styles";
 
 export default function Redo() {
   const { canvas, undoHistory, setUndoHistory, redoHistory, setRedoHistory } =
@@ -15,5 +17,10 @@ export default function Redo() {
     }
   };
 
-  return <button onClick={redo}>Redo</button>;
+  return (
+    <S.Button onClick={redo}>
+      <RedoIcon />
+      재실행
+    </S.Button>
+  );
 }

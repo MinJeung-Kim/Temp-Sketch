@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { fabric } from "fabric";
 import { useCanvas } from "@src/context/CanvasContext";
+import ShapeIcon from "@src/components/ui/icons/ShapeIcon";
+import { S } from "./styles";
 
 export default function AddShape() {
   const { saveState, canvas } = useCanvas();
@@ -74,9 +76,9 @@ export default function AddShape() {
 
   return (
     <>
-      <button onClick={() => setShowShapeMenu(!showShapeMenu)}>
-        Add Shape
-      </button>
+      <S.Button onClick={() => setShowShapeMenu(!showShapeMenu)}>
+        <ShapeIcon /> 도형
+      </S.Button>
       {showShapeMenu && (
         <div
           style={{

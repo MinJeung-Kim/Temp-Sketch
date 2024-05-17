@@ -1,4 +1,6 @@
+import SelectIcon from "@src/components/ui/icons/SelectIcon";
 import { useCanvas } from "@src/context/CanvasContext";
+import { S } from "./styles";
 
 export default function Select() {
   const { setMode, canvas } = useCanvas();
@@ -12,5 +14,10 @@ export default function Select() {
     }
   };
 
-  return <button onClick={startSelect}>Select</button>;
+  return (
+    <S.Button onClick={startSelect}>
+      <SelectIcon />
+      수정
+    </S.Button>
+  );
 }

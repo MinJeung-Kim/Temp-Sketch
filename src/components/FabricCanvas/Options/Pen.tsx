@@ -1,6 +1,9 @@
+import { useEffect, useCallback } from "react";
 import { fabric } from "fabric";
 import { useCanvas } from "@src/context/CanvasContext";
-import { useEffect, useCallback } from "react";
+
+import PenIcon from "@src/components/ui/icons/PenIcon";
+import { S } from "./styles";
 
 export default function Pen() {
   const { canvas, setMode, selectedColor } = useCanvas();
@@ -30,5 +33,9 @@ export default function Pen() {
     }
   };
 
-  return <button onClick={startDraw}>Start Drawing</button>;
+  return (
+    <S.Button onClick={startDraw}>
+      <PenIcon /> 그리기
+    </S.Button>
+  );
 }

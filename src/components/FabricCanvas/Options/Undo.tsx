@@ -1,4 +1,6 @@
+import UndoIcon from "@src/components/ui/icons/UndoIcon";
 import { useCanvas } from "@src/context/CanvasContext";
+import { S } from "./styles";
 
 export default function Undo() {
   const { canvas, undoHistory, setUndoHistory, redoHistory, setRedoHistory } =
@@ -16,5 +18,10 @@ export default function Undo() {
     }
   };
 
-  return <button onClick={undo}>Undo</button>;
+  return (
+    <S.Button onClick={undo}>
+      <UndoIcon />
+      실행취소
+    </S.Button>
+  );
 }

@@ -1,5 +1,7 @@
 import { fabric } from "fabric";
 import { useCanvas } from "@src/context/CanvasContext";
+import TextIcon from "@src/components/ui/icons/TextIcon";
+import { S } from "./styles";
 
 type Props = {
   inputRef: React.RefObject<HTMLInputElement>;
@@ -49,7 +51,10 @@ export default function Text({
         style={{ ...inputStyle, display: inputVisible ? "block" : "none" }}
         onBlur={handleInputBlur}
       />
-      <button onClick={() => setMode("text")}>Add Text</button>
+      <S.Button onClick={() => setMode("text")}>
+        <TextIcon />
+        텍스트
+      </S.Button>
     </>
   );
 }
