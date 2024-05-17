@@ -7,6 +7,7 @@ import Text from "../Text";
 import Reset from "../Reset";
 import Delete from "../Delete";
 import Select from "../Select";
+import AddShape from "../AddShape";
 import AddImage from "../AddImage";
 import AddBackground from "../AddBackground";
 import { useCanvas } from "@src/context/CanvasContext";
@@ -21,74 +22,7 @@ const FabricCanvas: React.FC = () => {
     left: number;
     top: number;
   }>({ left: 0, top: 0 });
-  const [showShapeMenu, setShowShapeMenu] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const addShape = (shape: fabric.Object) => {
-    if (canvas) {
-      canvas.add(shape);
-      saveState(canvas);
-    }
-  };
-
-  const createPolygon = (sideCount: number, radius: number) => {
-    const sweep = (Math.PI * 2) / sideCount;
-    const points = [];
-    for (let i = 0; i < sideCount; i++) {
-      points.push({
-        x: radius + radius * Math.cos(i * sweep),
-        y: radius + radius * Math.sin(i * sweep),
-      });
-    }
-    return points;
-  };
-
-  const addHex = () => {
-    const points = createPolygon(6, 50);
-    const hex = new fabric.Polygon(points, {
-      left: canvas!.width! / 2,
-      top: canvas!.height! / 2,
-      fill: "rgba(0,0,0,0)",
-      stroke: "black",
-      strokeWidth: 3,
-      originX: "center",
-      originY: "center",
-    } as fabric.Polygon);
-    addShape(hex);
-    setShowShapeMenu(false); // 메뉴 닫기
-  };
-
-  const addRect = () => {
-    const rect = new fabric.Rect({
-      left: canvas!.width! / 2,
-      top: canvas!.height! / 2,
-      fill: "rgba(0,0,0,0)",
-      stroke: "black",
-      width: 50,
-      height: 50,
-      originX: "center",
-      originY: "center",
-      strokeWidth: 3,
-    } as fabric.Rect);
-    addShape(rect);
-    setShowShapeMenu(false); // 메뉴 닫기
-  };
-
-  const addTriangle = () => {
-    const triangle = new fabric.Triangle({
-      left: canvas!.width! / 2,
-      top: canvas!.height! / 2,
-      fill: "rgba(0,0,0,0)",
-      stroke: "black",
-      width: 44,
-      height: 44,
-      originX: "center",
-      originY: "center",
-      strokeWidth: 3,
-    } as fabric.Triangle);
-    addShape(triangle);
-    setShowShapeMenu(false); // 메뉴 닫기
-  };
 
   const handleCanvasClick = (event: fabric.IEvent) => {
     if (mode === "text" && canvas) {
@@ -130,7 +64,7 @@ const FabricCanvas: React.FC = () => {
         });
         canvas.add(newLine);
         setLine(newLine);
-        saveState(canvas); // Save state after starting a new line
+        saveState(canvas);
       }
     }
   };
@@ -151,7 +85,7 @@ const FabricCanvas: React.FC = () => {
       setIsDown(false);
       if (line) {
         line.setCoords();
-        saveState(canvas); // Save state after completing the line
+        saveState(canvas);
       }
     }
   };
@@ -170,25 +104,7 @@ const FabricCanvas: React.FC = () => {
 
   return (
     <div style={{ position: "relative" }}>
-      <button onClick={() => setShowShapeMenu(!showShapeMenu)}>
-        Add Shape
-      </button>
-      {showShapeMenu && (
-        <div
-          style={{
-            position: "absolute",
-            top: "40px",
-            left: "10px",
-            background: "white",
-            border: "1px solid #ccc",
-            padding: "10px",
-          }}
-        >
-          <button onClick={addHex}>Add Hexagon</button>
-          <button onClick={addRect}>Add Rectangle</button>
-          <button onClick={addTriangle}>Add Triangle</button>
-        </div>
-      )}
+      <AddShape />
       <Text
         inputRef={inputRef}
         inputPosition={inputPosition}
