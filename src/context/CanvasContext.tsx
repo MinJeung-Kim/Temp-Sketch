@@ -15,6 +15,8 @@ type State = {
   setUndoHistory: React.Dispatch<React.SetStateAction<string[]>>;
   redoHistory: string[];
   setRedoHistory: React.Dispatch<React.SetStateAction<string[]>>;
+  mode: string;
+  setMode: React.Dispatch<React.SetStateAction<string>>;
   saveState: (canvasInstance: fabric.Canvas) => void;
 };
 
@@ -25,6 +27,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [undoHistory, setUndoHistory] = useState<string[]>([]);
   const [redoHistory, setRedoHistory] = useState<string[]>([]);
+  const [mode, setMode] = useState<string>("");
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -84,6 +87,8 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         redoHistory,
         setRedoHistory,
         saveState,
+        mode,
+        setMode,
       }}
     >
       {children}

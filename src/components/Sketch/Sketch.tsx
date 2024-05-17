@@ -1,46 +1,28 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
+import Pen from "../Pen";
+import Undo from "../Undo";
+import Redo from "../Redo";
+import Text from "../Text";
+import Reset from "../Reset";
+import Delete from "../Delete";
+import Select from "../Select";
 import AddImage from "../AddImage";
+import AddBackground from "../AddBackground";
 import { useCanvas } from "@src/context/CanvasContext";
 
 const FabricCanvas: React.FC = () => {
-  const { saveState, canvas } = useCanvas();
-  const [mode, setMode] = useState<string>("");
+  const { saveState, canvas, mode } = useCanvas();
   const [isDown, setIsDown] = useState<boolean>(false);
   const [line, setLine] = useState<fabric.Line | null>(null);
-  const [undoHistory, setUndoHistory] = useState<string[]>([]);
-  const [redoHistory, setRedoHistory] = useState<string[]>([]);
   const [inputVisible, setInputVisible] = useState<boolean>(false);
   const [inputStyle, setInputStyle] = useState<React.CSSProperties>({});
   const [inputPosition, setInputPosition] = useState<{
     left: number;
     top: number;
   }>({ left: 0, top: 0 });
+  const [showShapeMenu, setShowShapeMenu] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const undo = () => {
-    if (canvas && undoHistory.length > 1) {
-      const newRedoHistory = [undoHistory.pop()!, ...redoHistory];
-      setRedoHistory(newRedoHistory);
-      const previousState = undoHistory[undoHistory.length - 1];
-      canvas.loadFromJSON(previousState, () => {
-        canvas.renderAll();
-        setUndoHistory([...undoHistory]);
-      });
-    }
-  };
-
-  const redo = () => {
-    if (canvas && redoHistory.length > 0) {
-      const nextState = redoHistory.shift()!;
-      setUndoHistory([...undoHistory, nextState]);
-      setRedoHistory(redoHistory);
-      canvas.loadFromJSON(nextState, () => {
-        canvas.renderAll();
-      });
-    }
-  };
 
   const addShape = (shape: fabric.Object) => {
     if (canvas) {
@@ -73,6 +55,7 @@ const FabricCanvas: React.FC = () => {
       originY: "center",
     } as fabric.Polygon);
     addShape(hex);
+    setShowShapeMenu(false); // 메뉴 닫기
   };
 
   const addRect = () => {
@@ -88,6 +71,7 @@ const FabricCanvas: React.FC = () => {
       strokeWidth: 3,
     } as fabric.Rect);
     addShape(rect);
+    setShowShapeMenu(false); // 메뉴 닫기
   };
 
   const addTriangle = () => {
@@ -103,44 +87,7 @@ const FabricCanvas: React.FC = () => {
       strokeWidth: 3,
     } as fabric.Triangle);
     addShape(triangle);
-  };
-
-  const startDraw = () => {
-    if (canvas) {
-      setMode("pencil");
-      const brush = new fabric.PencilBrush(canvas);
-      brush.color = "black";
-      brush.width = 3;
-      canvas.freeDrawingBrush = brush;
-      canvas.isDrawingMode = true;
-      canvas.renderAll();
-    }
-  };
-
-  const startSelect = () => {
-    if (canvas) {
-      setMode("select");
-      canvas.isDrawingMode = false;
-      canvas.selection = true;
-      canvas.renderAll();
-    }
-  };
-
-  const clearCanvas = () => {
-    if (canvas) {
-      canvas.clear();
-      saveState(canvas);
-    }
-  };
-
-  const deleteSelectedObject = () => {
-    if (canvas) {
-      const activeObject = canvas.getActiveObject();
-      if (activeObject) {
-        canvas.remove(activeObject);
-        saveState(canvas);
-      }
-    }
+    setShowShapeMenu(false); // 메뉴 닫기
   };
 
   const handleCanvasClick = (event: fabric.IEvent) => {
@@ -164,27 +111,6 @@ const FabricCanvas: React.FC = () => {
           inputRef.current.focus();
         }
       }, 0);
-    }
-  };
-
-  const handleInputBlur = () => {
-    if (canvas && inputRef.current) {
-      const value = inputRef.current.value;
-      if (value) {
-        const text = new fabric.IText(value, {
-          left: inputPosition.left,
-          top: inputPosition.top,
-          fontFamily: "Arial",
-          fontSize: 20,
-          fill: "#000",
-          originX: "left",
-          originY: "top",
-        });
-        canvas.add(text);
-        saveState(canvas);
-      }
-      setInputVisible(false);
-      inputRef.current.value = "";
     }
   };
 
@@ -230,28 +156,6 @@ const FabricCanvas: React.FC = () => {
     }
   };
 
-  const setBackgroundImage = (file: File) => {
-    if (canvas) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        fabric.Image.fromURL(e.target?.result as string, (img) => {
-          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-            scaleX: canvas.width! / img.width!,
-            scaleY: canvas.height! / img.height!,
-          });
-          saveState(canvas);
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setBackgroundImage(event.target.files[0]);
-    }
-  };
-
   useEffect(() => {
     if (canvas) {
       canvas.on("mouse:down", handleCanvasClick);
@@ -266,33 +170,39 @@ const FabricCanvas: React.FC = () => {
 
   return (
     <div style={{ position: "relative" }}>
-      <input
-        type="text"
-        ref={inputRef}
-        style={{ ...inputStyle, display: inputVisible ? "block" : "none" }}
-        onBlur={handleInputBlur}
-      />
-      <button onClick={() => setMode("text")}>Add Text</button>
-      <button onClick={addHex}>Add Hexagon</button>
-      <button onClick={addRect}>Add Rectangle</button>
-      <button onClick={addTriangle}>Add Triangle</button>
-      <button onClick={startDraw}>Start Drawing</button>
-      <button onClick={startSelect}>Select</button>
-      <button onClick={clearCanvas}>Clear Canvas</button>
-      <button onClick={deleteSelectedObject}>Delete Selected Object</button>
-      <button onClick={undo}>Undo</button>
-      <button onClick={redo}>Redo</button>
-      <button onClick={clearCanvas}>Clear Canvas</button>
-      <button onClick={() => fileInputRef.current?.click()}>
-        Set Background Image
+      <button onClick={() => setShowShapeMenu(!showShapeMenu)}>
+        Add Shape
       </button>
-      <input
-        type="file"
-        accept="image/*"
-        ref={fileInputRef}
-        style={{ display: "none" }}
-        onChange={handleFileChange}
+      {showShapeMenu && (
+        <div
+          style={{
+            position: "absolute",
+            top: "40px",
+            left: "10px",
+            background: "white",
+            border: "1px solid #ccc",
+            padding: "10px",
+          }}
+        >
+          <button onClick={addHex}>Add Hexagon</button>
+          <button onClick={addRect}>Add Rectangle</button>
+          <button onClick={addTriangle}>Add Triangle</button>
+        </div>
+      )}
+      <Text
+        inputRef={inputRef}
+        inputPosition={inputPosition}
+        setInputVisible={setInputVisible}
+        inputStyle={inputStyle}
+        inputVisible={inputVisible}
       />
+      <Pen />
+      <Select />
+      <Reset />
+      <Delete />
+      <Undo />
+      <Redo />
+      <AddBackground />
       <AddImage />
     </div>
   );
