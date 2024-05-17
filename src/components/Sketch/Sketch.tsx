@@ -8,8 +8,9 @@ const FabricCanvas: React.FC = () => {
   const [mode, setMode] = useState<string>("");
   const [isDown, setIsDown] = useState<boolean>(false);
   const [line, setLine] = useState<fabric.Line | null>(null);
-  const [history, setHistory] = useState<string[]>([]);
-  const [currentHistoryIndex, setCurrentHistoryIndex] = useState<number>(-1);
+  const [undoHistory, setUndoHistory] = useState<string[]>([]);
+  const [redoHistory, setRedoHistory] = useState<string[]>([]);
+  const [textValue, setTextValue] = useState<string>("");
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -27,7 +28,7 @@ const FabricCanvas: React.FC = () => {
       });
       setCanvas(canvasInstance);
 
-      // Save the initial empty state
+      // 초기 상태 저장
       saveState(canvasInstance);
 
       canvasInstance.perPixelTargetFind = true;
@@ -54,19 +55,30 @@ const FabricCanvas: React.FC = () => {
 
   const saveState = (canvasInstance: fabric.Canvas) => {
     const json = JSON.stringify(canvasInstance.toJSON());
-    const newHistory = history.slice(0, currentHistoryIndex + 1);
-    newHistory.push(json);
-    setHistory(newHistory);
-    setCurrentHistoryIndex(newHistory.length - 1);
+    const newUndoHistory = [...undoHistory, json];
+    setUndoHistory(newUndoHistory);
+    setRedoHistory([]); // 새로운 상태가 저장될 때마다 redo 히스토리 초기화
   };
 
   const undo = () => {
-    if (canvas && currentHistoryIndex > 0) {
-      const newHistoryIndex = currentHistoryIndex - 1;
-      const previousState = history[newHistoryIndex];
+    if (canvas && undoHistory.length > 1) {
+      const newRedoHistory = [undoHistory.pop()!, ...redoHistory];
+      setRedoHistory(newRedoHistory);
+      const previousState = undoHistory[undoHistory.length - 1];
       canvas.loadFromJSON(previousState, () => {
         canvas.renderAll();
-        setCurrentHistoryIndex(newHistoryIndex);
+        setUndoHistory([...undoHistory]);
+      });
+    }
+  };
+
+  const redo = () => {
+    if (canvas && redoHistory.length > 0) {
+      const nextState = redoHistory.shift()!;
+      setUndoHistory([...undoHistory, nextState]);
+      setRedoHistory(redoHistory);
+      canvas.loadFromJSON(nextState, () => {
+        canvas.renderAll();
       });
     }
   };
@@ -179,6 +191,23 @@ const FabricCanvas: React.FC = () => {
     }
   };
 
+  const addText = () => {
+    if (canvas) {
+      const text = new fabric.IText(textValue, {
+        left: canvas!.width! / 2,
+        top: canvas!.height! / 2,
+        fontFamily: "Arial",
+        fontSize: 20,
+        fill: "#000",
+        originX: "center",
+        originY: "center",
+      });
+      canvas.add(text);
+      saveState(canvas);
+      setTextValue("");
+    }
+  };
+
   const handleMouseDown = (o: fabric.IEvent) => {
     if (canvas) {
       setIsDown(true);
@@ -245,6 +274,13 @@ const FabricCanvas: React.FC = () => {
 
   return (
     <div>
+      <input
+        type="text"
+        value={textValue}
+        onChange={(e) => setTextValue(e.target.value)}
+        placeholder="Enter text"
+      />
+      <button onClick={addText}>Add Text</button>
       <button onClick={addHex}>Add Hexagon</button>
       <button onClick={addRect}>Add Rectangle</button>
       <button onClick={addTriangle}>Add Triangle</button>
@@ -253,6 +289,7 @@ const FabricCanvas: React.FC = () => {
       <button onClick={clearCanvas}>Clear Canvas</button>
       <button onClick={deleteSelectedObject}>Delete Selected Object</button>
       <button onClick={undo}>Undo</button>
+      <button onClick={redo}>Redo</button>
       <canvas
         ref={canvasRef}
         width={800}
