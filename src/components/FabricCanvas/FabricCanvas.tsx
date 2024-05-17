@@ -6,7 +6,7 @@ import Redo from "./Options/Redo";
 import Text from "./Options/Text";
 import Color from "./Options/Color";
 import Reset from "./Options/Clear";
-import Delete from "./Options/Eraser";
+import Eraser from "./Options/Eraser";
 import Select from "./Options/Select";
 import AddShape from "./Options/AddShape";
 import AddImage from "./Options/AddImage";
@@ -106,7 +106,8 @@ export default function FabricCanvas() {
 
   return (
     <S.Canvas>
-      <AddShape />
+      <Undo />
+      <Redo />{" "}
       <Text
         inputRef={inputRef}
         inputPosition={inputPosition}
@@ -115,14 +116,13 @@ export default function FabricCanvas() {
         inputVisible={inputVisible}
       />
       <Pen />
+      <Color />
       <Select />
+      <AddShape />
+      <Eraser />
       <Reset />
-      <Delete />
-      <Undo />
-      <Redo />
       <AddBackground />
       <AddImage />
-      <Color />
     </S.Canvas>
   );
 }

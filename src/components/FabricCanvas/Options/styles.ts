@@ -7,12 +7,23 @@ export const S = {
     align-items: center;
     gap: 0.5rem;
   `,
-  Color: styled.div`
+  Wrap: styled.div`
+    position: relative;
+    width: 100%;
+  `,
+  Colors: styled.div`
+    width: 100%;
     position: absolute;
-    top: 40px;
-    left: 120px;
+    top: 0;
+    right: 24px;
     background: white;
     border: 1px solid #ccc;
     padding: 10px;
+    z-index: 999;
+  `,
+  Color: styled.button<{ $color: string }>`
+    background: ${({ $color }) => $color};
+    width: 20px;
+    height: 20px;
   `,
 };

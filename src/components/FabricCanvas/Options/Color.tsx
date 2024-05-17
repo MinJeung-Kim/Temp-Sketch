@@ -21,24 +21,24 @@ export default function Color() {
   ];
 
   return (
-    <>
+    <S.Wrap>
       <S.Button onClick={() => setShowColorMenu(!showColorMenu)}>
         <ColorIcon /> 색상
       </S.Button>
       {showColorMenu && (
-        <S.Color>
+        <S.Colors>
           {colors.map((color, index) => (
-            <button
+            <S.Color
+              $color={color}
               key={index}
               onClick={() => {
                 setSelectedColor(color);
                 setShowColorMenu(false);
               }}
-              style={{ backgroundColor: color, width: "20px", height: "20px" }}
-            ></button>
+            ></S.Color>
           ))}
-        </S.Color>
+        </S.Colors>
       )}
-    </>
+    </S.Wrap>
   );
 }

@@ -75,7 +75,7 @@ export default function AddShape() {
   };
 
   return (
-    <>
+    <S.Wrap>
       <S.Button onClick={() => setShowShapeMenu(!showShapeMenu)}>
         <ShapeIcon /> 도형
       </S.Button>
@@ -95,6 +95,6 @@ export default function AddShape() {
           <button onClick={addTriangle}>Add Triangle</button>
         </div>
       )}
-    </>
+    </S.Wrap>
   );
 }
