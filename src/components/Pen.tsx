@@ -1,11 +1,11 @@
 import { fabric } from "fabric";
 import { useCanvas } from "@src/context/CanvasContext";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 export default function Pen() {
   const { canvas, setMode, selectedColor } = useCanvas();
 
-  const updateBrush = () => {
+  const updateBrush = useCallback(() => {
     if (canvas) {
       const brush = new fabric.PencilBrush(canvas);
       brush.color = selectedColor;
@@ -13,13 +13,13 @@ export default function Pen() {
       canvas.freeDrawingBrush = brush;
       canvas.renderAll();
     }
-  };
+  }, [canvas, selectedColor]);
 
   useEffect(() => {
     if (canvas && canvas.isDrawingMode) {
       updateBrush();
     }
-  }, [selectedColor, canvas]);
+  }, [selectedColor, canvas, updateBrush]);
 
   const startDraw = () => {
     if (canvas) {
