@@ -2,10 +2,10 @@ import { useState } from "react";
 import { fabric } from "fabric";
 import { useCanvas } from "@src/context/CanvasContext";
 import ShapeIcon from "@src/components/ui/icons/ShapeIcon";
-import { S } from "./styles";
 import HexagonIcon from "@src/components/ui/icons/HexagonIcon";
-import RectangleIcon from "@src/components/ui/icons/RectangleIcon";
 import TriangleIcon from "@src/components/ui/icons/TriangleIcon";
+import RectangleIcon from "@src/components/ui/icons/RectangleIcon";
+import { S } from "./styles";
 
 export default function AddShape() {
   const { saveState, canvas } = useCanvas();

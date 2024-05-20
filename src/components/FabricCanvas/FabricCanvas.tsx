@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
+import Canvas from "./Canvas";
 import Pen from "./Options/Pen";
 import Undo from "./Options/Undo";
 import Redo from "./Options/Redo";
@@ -13,7 +14,6 @@ import AddImage from "./Options/AddImage";
 import AddBackground from "./Options/AddBackground";
 import { useCanvas } from "@src/context/CanvasContext";
 import { S } from "./styles";
-import Canvas from "./Canvas";
 
 export default function FabricCanvas() {
   const { saveState, canvas, mode } = useCanvas();

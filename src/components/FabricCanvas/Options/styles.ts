@@ -22,7 +22,7 @@ export const S = {
     gap: 0.58rem;
     background: white;
     border: 1px solid #ccc;
-    padding: 10px;
+    padding: 1rem;
     z-index: 999;
   `,
   Color: styled.button<{ $color: string }>`
@@ -38,7 +38,27 @@ export const S = {
     right: 131px;
     background: white;
     border: 1px solid #ccc;
-    padding: 10px;
+    padding: 1rem;
     z-index: 999;
+  `,
+  BrushWrap: styled.div`
+    position: absolute;
+    top: 0;
+    right: 131px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    height: 30px;
+    z-index: 999;
+  `,
+  Brush: styled.input``,
+  BrushSize: styled.span<{ $brushSize: number }>`
+    position: absolute;
+    bottom: 3px;
+    left: ${({ $brushSize }) => `calc(${($brushSize / 60) * 100}% )`};
+    font-size: 0.7rem;
+    border-radius: 50%;
+    background: #ccc;
+    padding: 0.2rem;
   `,
 };
