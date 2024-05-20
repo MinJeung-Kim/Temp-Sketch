@@ -3,6 +3,9 @@ import { fabric } from "fabric";
 import { useCanvas } from "@src/context/CanvasContext";
 import ShapeIcon from "@src/components/ui/icons/ShapeIcon";
 import { S } from "./styles";
+import HexagonIcon from "@src/components/ui/icons/HexagonIcon";
+import RectangleIcon from "@src/components/ui/icons/RectangleIcon";
+import TriangleIcon from "@src/components/ui/icons/TriangleIcon";
 
 export default function AddShape() {
   const { saveState, canvas } = useCanvas();
@@ -80,9 +83,15 @@ export default function AddShape() {
         <ShapeIcon /> 도형
         {showShapeMenu && (
           <S.ShapeOptions>
-            <button onClick={addHex}>Add Hexagon</button>
-            <button onClick={addRect}>Add Rectangle</button>
-            <button onClick={addTriangle}>Add Triangle</button>
+            <button onClick={addHex}>
+              <HexagonIcon />
+            </button>
+            <button onClick={addRect}>
+              <RectangleIcon />
+            </button>
+            <button onClick={addTriangle}>
+              <TriangleIcon />
+            </button>
           </S.ShapeOptions>
         )}
       </S.Button>
