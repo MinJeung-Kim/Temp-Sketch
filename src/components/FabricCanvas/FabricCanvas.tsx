@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { fabric } from "fabric";
 import Canvas from "./Canvas";
 import Pen from "./Options/Pen";
@@ -27,63 +27,72 @@ export default function FabricCanvas() {
     top: number;
   }>({ left: 0, top: 0 });
 
-  const handleCanvasClick = (event: fabric.IEvent) => {
-    if (mode === "text" && canvas) {
-      const pointer = canvas.getPointer(event.e);
-      setInputStyle({
-        left: pointer.x,
-        top: pointer.y,
-        position: "absolute",
-        border: "1px solid #000",
-        background: "transparent",
-        color: "#000",
-        fontSize: "20px",
-        outline: "none",
-        zIndex: 1,
-      });
-      setInputPosition({ left: pointer.x, top: pointer.y });
-      setInputVisible(true);
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 0);
-    }
-  };
-
-  const handleMouseDown = (o: fabric.IEvent) => {
-    if (canvas) {
-      setIsDown(true);
-      const pointer = canvas.getPointer(o.e);
-      const points = [pointer.x, pointer.y, pointer.x, pointer.y];
-
-      if (mode === "draw") {
-        const newLine = new fabric.Line(points, {
-          strokeWidth: 1,
-          fill: "black",
-          stroke: "black",
-          originX: "center",
-          originY: "center",
+  const handleCanvasClick = useCallback(
+    (event: fabric.IEvent) => {
+      if (mode === "text" && canvas) {
+        const pointer = canvas.getPointer(event.e);
+        setInputStyle({
+          left: pointer.x,
+          top: pointer.y,
+          position: "absolute",
+          border: "1px solid #000",
+          background: "transparent",
+          color: "#000",
+          fontSize: "20px",
+          outline: "none",
+          zIndex: 1,
         });
-        canvas.add(newLine);
-        setLine(newLine);
-        saveState(canvas);
+        setInputPosition({ left: pointer.x, top: pointer.y });
+        setInputVisible(true);
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }, 0);
       }
-    }
-  };
+    },
+    [canvas, mode]
+  );
 
-  const handleMouseMove = (o: fabric.IEvent) => {
-    if (canvas && isDown) {
-      const pointer = canvas.getPointer(o.e);
+  const handleMouseDown = useCallback(
+    (o: fabric.IEvent) => {
+      if (canvas) {
+        setIsDown(true);
+        const pointer = canvas.getPointer(o.e);
+        const points = [pointer.x, pointer.y, pointer.x, pointer.y];
 
-      if (mode === "draw" && line) {
-        line.set({ x2: pointer.x, y2: pointer.y });
-        canvas.renderAll();
+        if (mode === "draw") {
+          const newLine = new fabric.Line(points, {
+            strokeWidth: 1,
+            fill: "black",
+            stroke: "black",
+            originX: "center",
+            originY: "center",
+          });
+          canvas.add(newLine);
+          setLine(newLine);
+          saveState(canvas);
+        }
       }
-    }
-  };
+    },
+    [canvas, mode, saveState]
+  );
 
-  const handleMouseUp = () => {
+  const handleMouseMove = useCallback(
+    (o: fabric.IEvent) => {
+      if (canvas && isDown) {
+        const pointer = canvas.getPointer(o.e);
+
+        if (mode === "draw" && line) {
+          line.set({ x2: pointer.x, y2: pointer.y });
+          canvas.renderAll();
+        }
+      }
+    },
+    [canvas, isDown, line, mode]
+  );
+
+  const handleMouseUp = useCallback(() => {
     if (canvas) {
       setIsDown(false);
       if (line) {
@@ -91,7 +100,7 @@ export default function FabricCanvas() {
         saveState(canvas);
       }
     }
-  };
+  }, [canvas, line, saveState]);
 
   useEffect(() => {
     if (canvas) {
@@ -103,7 +112,25 @@ export default function FabricCanvas() {
       canvas.on("object:modified", () => saveState(canvas));
       canvas.on("object:removed", () => saveState(canvas));
     }
-  }, [canvas, mode, line]);
+    return () => {
+      if (canvas) {
+        canvas.off("mouse:down", handleCanvasClick);
+        canvas.off("mouse:down", handleMouseDown);
+        canvas.off("mouse:move", handleMouseMove);
+        canvas.off("mouse:up", handleMouseUp);
+        canvas.off("object:added", () => saveState(canvas));
+        canvas.off("object:modified", () => saveState(canvas));
+        canvas.off("object:removed", () => saveState(canvas));
+      }
+    };
+  }, [
+    canvas,
+    handleCanvasClick,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    saveState,
+  ]);
 
   return (
     <S.Canvas>
