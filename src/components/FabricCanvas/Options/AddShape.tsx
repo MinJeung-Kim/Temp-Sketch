@@ -78,23 +78,14 @@ export default function AddShape() {
     <S.Wrap>
       <S.Button onClick={() => setShowShapeMenu(!showShapeMenu)}>
         <ShapeIcon /> 도형
+        {showShapeMenu && (
+          <S.ShapeOptions>
+            <button onClick={addHex}>Add Hexagon</button>
+            <button onClick={addRect}>Add Rectangle</button>
+            <button onClick={addTriangle}>Add Triangle</button>
+          </S.ShapeOptions>
+        )}
       </S.Button>
-      {showShapeMenu && (
-        <div
-          style={{
-            position: "absolute",
-            top: "40px",
-            left: "10px",
-            background: "white",
-            border: "1px solid #ccc",
-            padding: "10px",
-          }}
-        >
-          <button onClick={addHex}>Add Hexagon</button>
-          <button onClick={addRect}>Add Rectangle</button>
-          <button onClick={addTriangle}>Add Triangle</button>
-        </div>
-      )}
     </S.Wrap>
   );
 }

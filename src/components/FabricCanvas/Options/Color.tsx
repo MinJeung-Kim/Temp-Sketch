@@ -24,21 +24,21 @@ export default function Color() {
     <S.Wrap>
       <S.Button onClick={() => setShowColorMenu(!showColorMenu)}>
         <ColorIcon /> 색상
+        {showColorMenu && (
+          <S.Colors>
+            {colors.map((color, index) => (
+              <S.Color
+                $color={color}
+                key={index}
+                onClick={() => {
+                  setSelectedColor(color);
+                  setShowColorMenu(false);
+                }}
+              ></S.Color>
+            ))}
+          </S.Colors>
+        )}
       </S.Button>
-      {showColorMenu && (
-        <S.Colors>
-          {colors.map((color, index) => (
-            <S.Color
-              $color={color}
-              key={index}
-              onClick={() => {
-                setSelectedColor(color);
-                setShowColorMenu(false);
-              }}
-            ></S.Color>
-          ))}
-        </S.Colors>
-      )}
     </S.Wrap>
   );
 }

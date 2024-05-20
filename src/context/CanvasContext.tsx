@@ -66,9 +66,11 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
 
       window.addEventListener("keydown", handleKeyDown);
 
+      // Clean up function
       return () => {
         window.removeEventListener("keydown", handleKeyDown);
         canvasInstance.dispose();
+        setCanvas(null);
       };
     }
   }, []);
@@ -97,12 +99,6 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-      <canvas
-        ref={canvasRef}
-        width={800}
-        height={600}
-        style={{ border: "1px solid #ccc" }}
-      />
     </CanvasContext.Provider>
   );
 }

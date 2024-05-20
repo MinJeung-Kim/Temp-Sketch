@@ -13,6 +13,7 @@ import AddImage from "./Options/AddImage";
 import AddBackground from "./Options/AddBackground";
 import { useCanvas } from "@src/context/CanvasContext";
 import { S } from "./styles";
+import Canvas from "./Canvas";
 
 export default function FabricCanvas() {
   const { saveState, canvas, mode } = useCanvas();
@@ -106,23 +107,26 @@ export default function FabricCanvas() {
 
   return (
     <S.Canvas>
-      <Undo />
-      <Redo />{" "}
-      <Text
-        inputRef={inputRef}
-        inputPosition={inputPosition}
-        setInputVisible={setInputVisible}
-        inputStyle={inputStyle}
-        inputVisible={inputVisible}
-      />
-      <Pen />
-      <Color />
-      <Select />
-      <AddShape />
-      <Eraser />
-      <Reset />
-      <AddBackground />
-      <AddImage />
+      <Canvas />
+      <S.Options>
+        <Undo />
+        <Redo />
+        <Text
+          inputRef={inputRef}
+          inputPosition={inputPosition}
+          setInputVisible={setInputVisible}
+          inputStyle={inputStyle}
+          inputVisible={inputVisible}
+        />
+        <Pen />
+        <Color />
+        <Select />
+        <AddShape />
+        <Eraser />
+        <Reset />
+        <AddBackground />
+        <AddImage />
+      </S.Options>
     </S.Canvas>
   );
 }
